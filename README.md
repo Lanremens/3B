@@ -8,7 +8,7 @@ A modern web browser.
 
 # How to Use
 
-1. Clone this repository or download the `index.html` file.
+1. Clone this repository or download the `index.html` file. (Or open the URL of the README)
 2. Open the file in your web browser.
 3. Enjoy! Feel free to modify the code as you like.
 
