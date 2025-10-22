@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>3°B</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap');
+
+body {
+    margin: 0;
+    padding: 0;
+    height: 100vh;
+    background-color: #000;
+    color: #fff;
+    font-family: 'Inter', sans-serif;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    overflow: hidden;
+    position: relative;
+    cursor: none;
+    user-select: none;
+}
+
+/* Estrellas */
+#stars {
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    z-index: 0;
+}
+
+/* Contadores */
+.counter {
+    position: absolute;
+    top: 20px;
+    right: 30px;
+    text-align: right;
+    z-index: 3;
+}
+
+.counter p {
+    margin: 4px 0;
+    font-size: 1rem;
+    font-weight: 300;
+    color: rgba(255,255,255,0.75);
+    letter-spacing: 0.05em;
+}
+
+.counter span {
+    font-weight: 600;
+    color: white;
+}
+
+/* Efecto de potenciación */
+.double-active {
+    animation: glow 1s infinite alternate;
+}
+
+@keyframes glow {
+    from { text-shadow: 0 0 5px #fff, 0 0 10px #00b7ff; }
+    to { text-shadow: 0 0 20px #00b7ff, 0 0 40px #00b7ff; }
+}
+
+/* Frase */
+#phrase {
+    position: absolute;
+    bottom: 60%;
+    transform: translateX(-50%);
+    left: 50%;
+    font-size: 1rem;
+    font-weight: 300;
+    color: rgba(255,255,255,0.9);
+    text-align: center;
+    z-index: 4;
+    opacity: 0;
+    transition: opacity 0.7s ease, transform 0.7s ease;
+}
+
+/* Texto principal */
+h1 {
+    font-size: 5rem;
+    font-weight: 600;
+    letter-spacing: 0.15em;
+    margin: 0;
+    z-index: 2;
+    text-transform: uppercase;
+}
+
+/* Cuenta regresiva */
+.countdown {
+    font-size: 1.4rem;
+    font-weight: 300;
+    letter-spacing: 0.1em;
+    border-top: 1px solid rgba(255,255,255,0.3);
+    padding-top: 1rem;
+    z-index: 2;
+}
+
+/* Texto inferior */
+#footer-text {
+    position: absolute;
+    bottom: 20px;
+    left: 30px;
+    font-size: 0.9rem;
+    font-weight: 300;
+    color: rgba(255,255,255,0.75);
+    z-index: 4;
+}
+
+#footer-text span {
+    font-weight: 600;
+    color: white;
+    text-shadow: 0 0 8px rgba(255,255,255,0.7), 0 0 15px rgba(255,255,255,0.5);
+    cursor: none;
+}
+
+/* Cursor Galaxy */
+.cursor {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 40px;
+    height: 40px;
+    background: radial-gradient(circle, rgba(255,255,255,0.9) 0%, rgba(255,255,255,0.3) 60%, transparent 70%);
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+    pointer-events: none;
+    mix-blend-mode: difference;
+    z-index: 10;
+}
+
+/* Responsive */
+@media (max-width: 600px) {
+    h1 { font-size: 3rem; }
+    .countdown { font-size: 1rem; }
+    .counter p { font-size: 0.9rem; }
+    #footer-text { font-size: 0.8rem; left: 15px; bottom: 15px; }
+}
+</style>
+</head>
+<body>
+
+<canvas id="stars"></canvas>
+
+<div class="counter">
+    <p>Clics: <span id="clickCount">0</span></p>
+    <p>Espacios: <span id="spaceCount">0</span></p>
+</div>
+
+<div id="phrase"></div>
+<h1>3°B</h1>
+<div class="countdown" id="countdown">Cargando...</div>
+
+<div id="footer-text">Esta página web ha sido creada por <span>Lanremens.</span></div>
+
+<div class="cursor" id="cursor"></div>
+
+<script>
+/* === Estrellas === */
+const canvas = document.getElementById("stars");
+const ctx = canvas.getContext("2d");
+let stars = [];
+let width, height;
+function initStars() {
+    width = canvas.width = window.innerWidth;
+    height = canvas.height = window.innerHeight;
+    stars = [];
+    for (let i = 0; i < 600; i++) {
+        stars.push({
+            x: Math.random() * width,
+            y: Math.random() * height,
+            size: Math.random() * 1.2,
+            speed: Math.random() * 0.2 + 0.05
+        });
+    }
+}
+function animateStars() {
+    ctx.fillStyle = "rgba(0,0,0,0.25)";
+    ctx.fillRect(0, 0, width, height);
+    ctx.fillStyle = "#ffffff";
+    for (let star of stars) {
+        ctx.beginPath();
+        ctx.arc(star.x, star.y, star.size, 0, Math.PI*2);
+        ctx.fill();
+        star.y += star.speed;
+        if (star.y > height) star.y = 0;
+    }
+    requestAnimationFrame(animateStars);
+}
+window.addEventListener("resize", initStars);
+initStars();
+animateStars();
+
+/* === Cursor con rastro lineal === */
+const cursor = document.getElementById("cursor");
+let lastX = 0, lastY = 0;
+
+document.addEventListener("mousemove", e => {
+    cursor.style.top = e.clientY + "px";
+    cursor.style.left = e.clientX + "px";
+
+    const trail = document.createElement("div");
+    trail.style.position = "fixed";
+    trail.style.background = "rgba(255,255,255,0.2)";
+    trail.style.height = "2px";
+    trail.style.zIndex = "1";
+    trail.style.pointerEvents = "none";
+    trail.style.transformOrigin = "0 0";
+    
+    const dx = e.clientX - lastX;
+    const dy = e.clientY - lastY;
+    const distance = Math.sqrt(dx*dx + dy*dy);
+    const angle = Math.atan2(dy, dx) * (180 / Math.PI);
+
+    trail.style.width = distance + "px";
+    trail.style.top = lastY + "px";
+    trail.style.left = lastX + "px";
+    trail.style.transform = `rotate(${angle}deg)`;
+
+    document.body.appendChild(trail);
+
+    setTimeout(() => {
+        trail.style.transition = "opacity 0.4s ease";
+        trail.style.opacity = "0";
+        setTimeout(() => trail.remove(), 400);
+    }, 0);
+
+    lastX = e.clientX;
+    lastY = e.clientY;
+});
+
+/* === Cuenta regresiva === */
+function startCountdown() {
+    const countdownEl = document.getElementById('countdown');
+    const targetDate = new Date('2025-11-05T00:00:00+01:00');
+    function updateCountdown() {
+        const now = new Date();
+        const diff = targetDate - now;
+        if (diff <= 0) {
+            countdownEl.textContent = "Ha llegado el día.";
+            clearInterval(interval);
+            return;
+        }
+        const days = Math.floor(diff / (1000*60*60*24));
+        const hours = Math.floor((diff / (1000*60*60)) % 24);
+        const minutes = Math.floor((diff / (1000*60)) % 60);
+        const seconds = Math.floor((diff / 1000) % 60);
+        countdownEl.textContent = `${days} días ${hours} h ${minutes} m ${seconds} s`;
+    }
+    updateCountdown();
+    const interval = setInterval(updateCountdown, 1000);
+}
+startCountdown();
+
+/* === Frases === */
+const phrases = [
+    "Los de arriba esconden más que lo que brillan.",
+    "La verdad se esconde en la ciudad dorada.",
+    "Los misterios muy profundos serán desenterrados.",
+    "Los que obedezcan siempre serán superiores.",
+    "Mientras que avances los misterios se irán descubriendo.",
+    "Para salir primero hay que saber.",
+    "Los que viven en las nubes siempre serán peores.",
+    "Sigue avanzando y los secretos saldrán de las profecías.",
+    "Ellos mienten, todos mienten.",
+    "Hola, ¡Bienvenido a 3ºB!",
+    "¡Hola! ¿Sois los del nuevo piso, cierto?",
+    "Pocos saben la verdad pero muchos la sabrán.",
+    "La puerta injustamente sellada por muchos antiguamente fue hallada.",
+    "Estate atento el 24 de este mes.",
+    "Cada palabra y letra tienen su significado.",
+    "Ps, escúchame; confía en el que falso parece pero nunca perece."
+];
+
+let clickCount = 0;
+let spaceCount = 0;
+let doubleActive = false;
+const clickDisplay = document.getElementById("clickCount");
+const spaceDisplay = document.getElementById("spaceCount");
+const phraseEl = document.getElementById("phrase");
+const counterDiv = document.querySelector(".counter");
+
+/* Clics */
+document.addEventListener("click", () => {
+    const increment = doubleActive ? 2 : 1;
+    clickCount += increment;
+    clickDisplay.textContent = clickCount;
+    if (clickCount % 25 === 0) {
+        const random = phrases[Math.floor(Math.random() * phrases.length)];
+        showPhrase(random);
+    }
+});
+
+/* Espacio (solo 1 vez por pulsación) */
+document.addEventListener("keydown", (e) => {
+    if (e.code === "Space") {
+        if (e.repeat) return;
+        e.preventDefault();
+        spaceCount++;
+        spaceDisplay.textContent = spaceCount;
+
+        if (spaceCount % 100 === 0 && !doubleActive) {
+            activateDouble();
+        }
+    }
+});
+
+/* Activar modo x2 */
+function activateDouble() {
+    doubleActive = true;
+    counterDiv.classList.add("double-active");
+    showPhrase("El modo potenciado ha sido activado. (x2 Clics durante 10s)");
+    setTimeout(() => {
+        doubleActive = false;
+        counterDiv.classList.remove("double-active");
+        showPhrase("El modo potenciado ha sido desactivado.");
+    }, 10000);
+}
+
+/* Mostrar frase */
+function showPhrase(text){
+    phraseEl.textContent = text;
+    phraseEl.style.transform = "translateX(-50%) translateY(0)";
+    phraseEl.style.opacity = 1;
+    setTimeout(() => {
+        phraseEl.style.opacity = 0;
+        phraseEl.style.transform = "translateX(-50%) translateY(-10px)";
+    }, 3000);
+}
+</script>
+
+</body>
+</html>
